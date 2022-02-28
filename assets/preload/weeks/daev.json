@@ -1,0 +1,49 @@
+{
+	"storyName": "Your New Week",
+	"difficulties": "",
+	"hideFreeplay": false,
+	"weekBackground": "stage",
+	"weekBefore": "tutorial",
+	"freeplayColor": [
+		146,
+		113,
+		253
+	],
+	"startUnlocked": true,
+	"hideStoryMode": false,
+	"songs": [
+		[
+			"home",
+			"daev",
+			[
+				14,
+				24,
+				215
+			]
+		],
+		[
+			"angry",
+			"daev",
+			[
+				14,
+				24,
+				215
+			]
+		],
+		[
+			"dithered",
+			"daev-3d-pixel",
+			[
+				202,
+				113,
+				126
+			]
+		]
+	],
+	"weekCharacters": [
+		"dad",
+		"bf",
+		"gf"
+	],
+	"weekName": "Custom Week"
+}

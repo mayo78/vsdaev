@@ -14,9 +14,11 @@ class StrumNote extends FlxSprite
 	public var direction:Float = 90;//plan on doing scroll directions soon -bb
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var sustainReduce:Bool = true;
-	
+	public var threeDeeChars:Array<String> = ['dambu', 'dambai', 'crack', 'flakebu', '3d-daev'];
+	public var doAntialiasing:Bool = ClientPrefs.globalAntialiasing;
+
 	private var player:Int;
-	
+
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
 		if(texture != value) {
@@ -26,7 +28,7 @@ class StrumNote extends FlxSprite
 		return value;
 	}
 
-	public function new(x:Float, y:Float, leData:Int, player:Int) {
+	public function new(x:Float, y:Float, leData:Int, player:Int, char:String = 'bf') {
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
 		noteData = leData;
@@ -35,7 +37,24 @@ class StrumNote extends FlxSprite
 		super(x, y);
 
 		var skin:String = 'NOTE_assets';
-		if(PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
+
+		switch(char)
+		{
+			case 'flakebu':
+				skin = 'frost_notes';
+				doAntialiasing = false;
+			default:
+				for (i in 0...threeDeeChars.length)
+				{
+					if (threeDeeChars[i] == char)
+					{
+						skin = 'NOTE_assets_3D';
+						doAntialiasing = false;
+					}
+					else
+						if(PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
+				}
+		}
 		texture = skin; //Load texture and anims
 
 		scrollFactor.set();
@@ -88,7 +107,7 @@ class StrumNote extends FlxSprite
 			animation.addByPrefix('purple', 'arrowLEFT');
 			animation.addByPrefix('red', 'arrowRIGHT');
 
-			antialiasing = ClientPrefs.globalAntialiasing;
+			antialiasing = doAntialiasing;
 			setGraphicSize(Std.int(width * 0.7));
 
 			switch (Math.abs(noteData))

@@ -11,6 +11,7 @@ class HealthIcon extends FlxSprite
 	private var isOldIcon:Bool = false;
 	private var isPlayer:Bool = false;
 	private var char:String = '';
+	public var pixelIcons:Array<String> = ['dambu', 'dambai', 'crack', 'flakebu'];
 
 	public function new(char:String = 'bf', isPlayer:Bool = false)
 	{
@@ -56,6 +57,13 @@ class HealthIcon extends FlxSprite
 			if(char.endsWith('-pixel')) {
 				antialiasing = false;
 			}
+
+			for(i in 0...pixelIcons.length) {
+				if(pixelIcons[i] == char) {
+					antialiasing = false;
+				}
+			}
+
 		}
 	}
 

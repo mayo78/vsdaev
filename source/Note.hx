@@ -76,6 +76,14 @@ class Note extends FlxSprite
 	public var noAnimation:Bool = false;
 	public var hitCausesMiss:Bool = false;
 	public var distance:Float = 2000;//plan on doing scroll directions soon -bb
+	public var threeDeeChars:Array<String> = ['dambu', 'dambai', 'crack', 'flakebu', '3d-daev'];
+	public var skin:String = 'NOTE_assets';
+	public var threeDeeNote:Bool = false;
+
+	var hasNoteType:Bool = false;
+	var antialias:Bool = true;
+	var has3Dvarient:Bool = false;
+	var noteType3D:String = ''; //texture suffix to use if the note has a 3d varient
 
 	private function set_texture(value:String):String {
 		if(texture != value) {
@@ -106,10 +114,13 @@ class Note extends FlxSprite
 						missHealth = 0.3;
 					}
 					hitCausesMiss = true;
+					hasNoteType = true;
 				case 'No Animation':
 					noAnimation = true;
+					hasNoteType = true;
 				case 'GF Sing':
 					gfNote = true;
+					hasNoteType = true;
 			}
 			noteType = value;
 		}
@@ -119,9 +130,11 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false, char:String = 'boyfriend', ?threeDeeChar:Bool = false, ?threeDeeNote:Bool = false)
 	{
 		super();
+
+		threeDeeNote = FlxG.random.bool(25);
 
 		if (prevNote == null)
 			prevNote = this;
@@ -129,6 +142,36 @@ class Note extends FlxSprite
 		this.prevNote = prevNote;
 		isSustainNote = sustainNote;
 		this.inEditor = inEditor;
+
+		antialias = ClientPrefs.globalAntialiasing;
+
+
+		switch(char)
+		{
+			case 'flakebu':
+				skin = 'frost_notes';
+				antialias = false;
+			default:
+				for (i in 0...threeDeeChars.length)
+				{
+					if (threeDeeChars[i] == char)
+					{
+						skin = 'NOTE_assets_3D';
+						antialias = false;
+					}
+					else
+						if(PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
+				}
+		}
+		var threeDeeNote_tex:String = 'NOTE_assets_3D';
+			if (PlayState.SONG.player2 == 'flakebu' || PlayState.SONG.player1 == 'flakebu')
+				threeDeeNote_tex = 'frost_notes';
+
+		if(threeDeeNote)
+		{
+			skin = threeDeeNote_tex;
+			antialias = false;
+		}
 
 		x += (ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X) + 50;
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
@@ -160,6 +203,9 @@ class Note extends FlxSprite
 				animation.play(animToPlay + 'Scroll');
 			}
 		}
+
+		if(!hasNoteType && !has3Dvarient)
+			texture = skin + noteType3D;
 
 		// trace(prevNote);
 
@@ -213,7 +259,6 @@ class Note extends FlxSprite
 
 				if(PlayState.isPixelStage) {
 					prevNote.scale.y *= 1.19;
-					prevNote.scale.y *= (6 / height); //Auto adjust note size
 				}
 				prevNote.updateHitbox();
 				// prevNote.setGraphicSize();
@@ -229,14 +274,11 @@ class Note extends FlxSprite
 		x += offsetX;
 	}
 
-	var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;
-	var lastNoteScaleToo:Float = 1;
-	public var originalHeightForCalcs:Float = 6;
 	function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '') {
 		if(prefix == null) prefix = '';
 		if(texture == null) texture = '';
 		if(suffix == null) suffix = '';
-		
+
 		var skin:String = texture;
 		if(texture.length < 1) {
 			skin = PlayState.SONG.arrowSkin;
@@ -260,7 +302,6 @@ class Note extends FlxSprite
 				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'));
 				width = width / 4;
 				height = height / 2;
-				originalHeightForCalcs = height;
 				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'), true, Math.floor(width), Math.floor(height));
 			} else {
 				loadGraphic(Paths.image('pixelUI/' + blahblah));
@@ -271,23 +312,10 @@ class Note extends FlxSprite
 			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 			loadPixelNoteAnims();
 			antialiasing = false;
-
-			if(isSustainNote) {
-				offsetX += lastNoteOffsetXForPixelAutoAdjusting;
-				lastNoteOffsetXForPixelAutoAdjusting = (width - 7) * (PlayState.daPixelZoom / 2);
-				offsetX -= lastNoteOffsetXForPixelAutoAdjusting;
-				
-				/*if(animName != null && !animName.endsWith('end'))
-				{
-					lastScaleY /= lastNoteScaleToo;
-					lastNoteScaleToo = (6 / height);
-					lastScaleY *= lastNoteScaleToo; 
-				}*/
-			}
 		} else {
 			frames = Paths.getSparrowAtlas(blahblah);
 			loadNoteAnims();
-			antialiasing = ClientPrefs.globalAntialiasing;
+			antialiasing = antialias;
 		}
 		if(isSustainNote) {
 			scale.y = lastScaleY;
